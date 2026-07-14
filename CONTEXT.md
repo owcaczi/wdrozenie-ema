@@ -29,7 +29,7 @@
 | Element | Wartość |
 |---|---|
 | **Domena DC** | `spi.lab` |
-| **Domena stacji roboczych** | `absystems.pl` → **do przeniesienia na `spi.lab`** (decyzja ADR-0002) |
+| **Domena stacji roboczych** | `domena.pl` → **do przeniesienia na `spi.lab`** (decyzja ADR-0002) |
 | **Stara domena EMA** | `lab.local` (migrowana na `spi.lab`) → **czysta reinstalacja** (decyzja ADR-0001) |
 | **Typ CA** | Enterprise Root CA |
 | **Liczba stacji vPro** | 20 |
@@ -47,11 +47,11 @@
 - ✅ EMA Agent na stacjach — zainstalowany, widoczny w konsoli
 - ✅ Hash CA wgrany do BIOS-u AMT przez USB provisioning
 - ❌ Provisioning AMT — status "pending"
-- 🛠️ **Niezgodność domen** — stacje w `absystems.pl` → plan: unjoin i join do `spi.lab` (ADR-0002)
+- 🛠️ **Niezgodność domen** — stacje w `domena.pl` → plan: unjoin i join do `spi.lab` (ADR-0002)
 - 🛠️ **Certyfikat TLS EMA** — wystawiony na starą nazwę `lab.local` → plan: czysta reinstalacja EMA (ADR-0001)
 
 ## Zidentyfikowane problemy
 
-1. **DNS suffix mismatch** — stacje w `absystems.pl`, provisioning konfigurowany pod `spi.lab`
+1. **DNS suffix mismatch** — stacje w `domena.pl`, provisioning konfigurowany pod `spi.lab`
 2. **Rezydualna konfiguracja po migracji** — EMA przeniesiony z `lab.local` na `spi.lab`, mogą być resztki
 3. **Certyfikat TLS EMA** — alerty mismatch w przeglądarce wskazują na stary certyfikat

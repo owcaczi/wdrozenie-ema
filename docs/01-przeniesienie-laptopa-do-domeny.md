@@ -1,4 +1,4 @@
-# 01 — Przeniesienie laptopa z domeny `absystems.pl` do `spi.lab`
+# 01 — Przeniesienie laptopa z domeny `domena.pl` do `spi.lab`
 
 > **Dokument**: Procedura migracji stacji roboczej między domenami  
 > **Projekt**: Wdrożenie Intel EMA (ACM) — środowisko labowe  
@@ -11,7 +11,7 @@
 
 1. [Wymagania wstępne](#1-wymagania-wstępne)
 2. [Backup profilu użytkownika przed unjoin](#2-backup-profilu-użytkownika-przed-unjoin)
-3. [Unjoin z domeny absystems.pl](#3-unjoin-z-domeny-absystemspl)
+3. [Unjoin z domeny domena.pl](#3-unjoin-z-domeny-domenapl)
 4. [Join do domeny spi.lab](#4-join-do-domeny-spilab)
 5. [Weryfikacja po przeniesieniu](#5-weryfikacja-po-przeniesieniu)
 6. [Sprawdzenie czy AMT widzi nowy DNS suffix](#6-sprawdzenie-czy-amt-widzi-nowy-dns-suffix)
@@ -25,7 +25,7 @@ Przed rozpoczęciem upewnij się, że spełnione są następujące warunki:
 
 | Wymaganie | Szczegóły |
 |---|---|
-| **Uprawnienia** | Konto z prawami **Domain Admin** w obu domenach (`absystems.pl` i `spi.lab`) |
+| **Uprawnienia** | Konto z prawami **Domain Admin** w obu domenach (`domena.pl` i `spi.lab`) |
 | **Łączność sieciowa** | Stacja musi mieć łączność z kontrolerem domeny `spi.lab` (ping, port 389/LDAP, 445/SMB) |
 | **DNS** | Stacja musi resolwować nazwy w domenie `spi.lab` (ręcznie ustaw DNS lub dodaj conditional forwarder) |
 | **Konto docelowe** | Konto komputera w `spi.lab` — zostanie utworzone automatycznie przy join lub przygotowane wcześniej (`Prestage`) |
@@ -36,13 +36,13 @@ Przed rozpoczęciem upewnij się, że spełnione są następujące warunki:
 > Cały proces wymaga **dwóch restartów** — jednego po unjoin, drugiego po join. Zaplanuj okno serwisowe ok. 30 minut na stację.
 
 > [!NOTE]
-> To środowisko labowe — `absystems.pl` to domena produkcyjna firmy, `spi.lab` to domena testowa. Docelowo u klienta wszystko będzie w jednej domenie od początku i ten krok nie będzie potrzebny.
+> To środowisko labowe — `domena.pl` to domena produkcyjna firmy, `spi.lab` to domena testowa. Docelowo u klienta wszystko będzie w jednej domenie od początku i ten krok nie będzie potrzebny.
 
 ---
 
 ## 2. Backup profilu użytkownika przed unjoin
 
-Po odłączeniu stacji z domeny `absystems.pl` profil użytkownika domenowego pozostanie na dysku, ale może być niedostępny z poziomu nowego konta w `spi.lab`. Wykonaj backup kluczowych danych.
+Po odłączeniu stacji z domeny `domena.pl` profil użytkownika domenowego pozostanie na dysku, ale może być niedostępny z poziomu nowego konta w `spi.lab`. Wykonaj backup kluczowych danych.
 
 ### 2.1. Identyfikacja profili na stacji
 
@@ -54,7 +54,7 @@ Get-CimInstance -ClassName Win32_UserProfile |
     Format-Table -AutoSize
 ```
 
-**Oczekiwany wynik na ekranie**: Tabela z kolumnami `LocalPath`, `LastUseTime`, `SID`. Profile domenowe będą miały ścieżkę typu `C:\Users\jan.kowalski` lub `C:\Users\jan.kowalski.ABSYSTEMS`.
+**Oczekiwany wynik na ekranie**: Tabela z kolumnami `LocalPath`, `LastUseTime`, `SID`. Profile domenowe będą miały ścieżkę typu `C:\Users\jan.kowalski` lub `C:\Users\jan.kowalski.DOMENA`.
 
 ### 2.2. Backup danych profilu
 
@@ -138,10 +138,10 @@ Write-Host "Informacje zapisane w: $infoFile"
 
 ---
 
-## 3. Unjoin z domeny `absystems.pl`
+## 3. Unjoin z domeny `domena.pl`
 
 > [!CAUTION]
-> Po odłączeniu z domeny stacja przejdzie do grupy roboczej `WORKGROUP`. Upewnij się, że masz konto **lokalnego administratora** na stacji (nazwa i hasło), bo po restarcie nie zalogujesz się kontem domenowym `absystems.pl`.
+> Po odłączeniu z domeny stacja przejdzie do grupy roboczej `WORKGROUP`. Upewnij się, że masz konto **lokalnego administratora** na stacji (nazwa i hasło), bo po restarcie nie zalogujesz się kontem domenowym `domena.pl`.
 
 ### Przygotowanie: Aktywacja lokalnego konta administratora
 
@@ -162,20 +162,20 @@ Set-LocalUser -Name "Administrator" -Password (ConvertTo-SecureString "Tymczasow
 ### Metoda A: PowerShell (zalecana)
 
 ```powershell
-# Unjoin z domeny absystems.pl
-# -UnjoinDomainCredential: konto Domain Admin w absystems.pl
+# Unjoin z domeny domena.pl
+# -UnjoinDomainCredential: konto Domain Admin w domena.pl
 # -WorkgroupName: nazwa grupy roboczej po odłączeniu
 # -Force: nie czekaj na potwierdzenie
 # -Restart: automatyczny restart po odłączeniu
 
 Remove-Computer `
-    -UnjoinDomainCredential (Get-Credential -Message "Podaj konto Domain Admin w absystems.pl") `
+    -UnjoinDomainCredential (Get-Credential -Message "Podaj konto Domain Admin w domena.pl") `
     -WorkgroupName "WORKGROUP" `
     -Force `
     -Restart
 ```
 
-**Oczekiwany wynik na ekranie**: Pojawi się okno dialogowe z prośbą o podanie poświadczeń administratora domeny `absystems.pl` (format: `ABSYSTEMS\Administrator` lub `administrator@absystems.pl`). Po zaakceptowaniu stacja się zrestartuje.
+**Oczekiwany wynik na ekranie**: Pojawi się okno dialogowe z prośbą o podanie poświadczeń administratora domeny `domena.pl` (format: `DOMENA\Administrator` lub `administrator@domena.pl`). Po zaakceptowaniu stacja się zrestartuje.
 
 > [!NOTE]
 > Parametr `-Force` pomija dialog potwierdzenia. Flaga `-Restart` automatycznie restartuje komputer. Jeśli chcesz kontrolować moment restartu, pomiń `-Restart` i zrestartuj ręcznie: `Restart-Computer`.
@@ -195,7 +195,7 @@ Remove-Computer `
 4. Wpisz `WORKGROUP`
 
 5. Kliknij **OK**  
-   ↳ **Na ekranie**: Pojawi się okno z prośbą o poświadczenia konta z uprawnieniami do odłączenia z domeny. Wpisz konto Domain Admin `absystems.pl`
+   ↳ **Na ekranie**: Pojawi się okno z prośbą o poświadczenia konta z uprawnieniami do odłączenia z domeny. Wpisz konto Domain Admin `domena.pl`
 
 6. Po potwierdzeniu pojawi się komunikat: _„Witamy w grupie roboczej WORKGROUP"_
 
@@ -326,7 +326,7 @@ ipconfig /all
 | **DNS Servers** | Adres IP DC `spi.lab` |
 
 > [!WARNING]
-> Jeśli `Primary DNS Suffix` nadal pokazuje `absystems.pl` lub jest pusty, patrz sekcja Troubleshooting punkt 7.3.
+> Jeśli `Primary DNS Suffix` nadal pokazuje `domena.pl` lub jest pusty, patrz sekcja Troubleshooting punkt 7.3.
 
 ### 5.3. Kontakt z kontrolerem domeny
 
@@ -390,7 +390,7 @@ Test-NetConnection -ComputerName "dc.spi.lab" -Port 389
 ## 6. Sprawdzenie czy AMT widzi nowy DNS suffix
 
 > [!IMPORTANT]
-> To kluczowy krok! AMT provisioning w trybie ACM wymaga, aby DNS suffix widziany przez AMT zgadzał się z certyfikatem provisioning i konfiguracją EMA. Jeśli AMT nadal widzi `absystems.pl`, provisioning nie zadziała.
+> To kluczowy krok! AMT provisioning w trybie ACM wymaga, aby DNS suffix widziany przez AMT zgadzał się z certyfikatem provisioning i konfiguracją EMA. Jeśli AMT nadal widzi `domena.pl`, provisioning nie zadziała.
 
 ### 6.1. Sprawdzenie DNS suffix przez konfigurację sieciową OS
 
@@ -477,7 +477,7 @@ $staryProfil = Get-CimInstance Win32_UserProfile |
 $staryProfil | Select-Object LocalPath, SID
 
 # 2. Skopiuj dane ze starego profilu do nowego
-$staryPath = "C:\Users\jan.kowalski.ABSYSTEMS"   # <-- stary profil
+$staryPath = "C:\Users\jan.kowalski.DOMENA"   # <-- stary profil
 $nowyPath  = "C:\Users\jan.kowalski"              # <-- nowy profil (spi.lab)
 
 # Kopiuj Desktop, Documents, itp.
@@ -496,12 +496,12 @@ foreach ($f in $foldery) {
 
 ### 7.2. Brak dostępu do zasobów sieciowych
 
-**Objaw**: Po join do `spi.lab` brak dostępu do udziałów sieciowych, drukarek, aplikacji powiązanych z `absystems.pl`.
+**Objaw**: Po join do `spi.lab` brak dostępu do udziałów sieciowych, drukarek, aplikacji powiązanych z `domena.pl`.
 
-**Przyczyna**: Stacja nie jest już członkiem domeny `absystems.pl` i nie ma tokenu Kerberos dla tej domeny.
+**Przyczyna**: Stacja nie jest już członkiem domeny `domena.pl` i nie ma tokenu Kerberos dla tej domeny.
 
 **Rozwiązanie**:
-- Zasoby w `absystems.pl` — wymagają trustu między domenami lub dostępu po IP z kontem lokalnym
+- Zasoby w `domena.pl` — wymagają trustu między domenami lub dostępu po IP z kontem lokalnym
 - Zasoby w `spi.lab` — powinny być dostępne natychmiast po poprawnym join
 
 ```powershell
@@ -516,9 +516,9 @@ klist
 
 ### 7.3. DNS suffix nie zmienił się na `spi.lab`
 
-**Objaw**: `ipconfig /all` nadal pokazuje `absystems.pl` jako Primary DNS Suffix lub DNS suffix jest pusty.
+**Objaw**: `ipconfig /all` nadal pokazuje `domena.pl` jako Primary DNS Suffix lub DNS suffix jest pusty.
 
-**Przyczyna**: Rejestr nie zaktualizował się poprawnie lub GPO z `absystems.pl` nadal jest cache'owane.
+**Przyczyna**: Rejestr nie zaktualizował się poprawnie lub GPO z `domena.pl` nadal jest cache'owane.
 
 **Rozwiązanie**:
 
@@ -590,7 +590,7 @@ Restart-Computer
 
 **Objaw**: `gpresult /r` nie pokazuje żadnych polityk GPO z `spi.lab` lub pokazuje stare polityki.
 
-**Przyczyna**: Cache GPO z `absystems.pl` nadal obecny, lub konto komputera jest w domyślnym kontenerze Computers (poza OU z GPO).
+**Przyczyna**: Cache GPO z `domena.pl` nadal obecny, lub konto komputera jest w domyślnym kontenerze Computers (poza OU z GPO).
 
 **Rozwiązanie**:
 
@@ -620,9 +620,9 @@ Get-ADComputer "NAZWA-STACJI" | Select-Object DistinguishedName
 
 ---
 
-### 7.7. AMT DNS suffix nadal pokazuje `absystems.pl`
+### 7.7. AMT DNS suffix nadal pokazuje `domena.pl`
 
-**Objaw**: W MEBx lub EMA Console DNS suffix stacji to nadal `absystems.pl` mimo poprawnego join do `spi.lab`.
+**Objaw**: W MEBx lub EMA Console DNS suffix stacji to nadal `domena.pl` mimo poprawnego join do `spi.lab`.
 
 **Przyczyna**: AMT cache'uje DNS suffix i nie zawsze odświeża go automatycznie.
 

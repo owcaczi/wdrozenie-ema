@@ -1,10 +1,10 @@
-# ADR-0002: Rozwiązanie niezgodności domen (absystems.pl vs spi.lab)
+# ADR-0002: Rozwiązanie niezgodności domen (domena.pl vs spi.lab)
 
 ## Status
 Zaakceptowane — Opcja A
 
 ## Kontekst
-Stacje robocze (20 szt. vPro) są w domenie `absystems.pl`, podczas gdy kontroler domeny, CA i EMA Server działają w domenie `spi.lab`. AMT provisioning w trybie ACM wymaga zgodności DNS suffix między:
+Stacje robocze (20 szt. vPro) są w domenie `domena.pl`, podczas gdy kontroler domeny, CA i EMA Server działają w domenie `spi.lab`. AMT provisioning w trybie ACM wymaga zgodności DNS suffix między:
 - Hashem CA w BIOS-ie AMT
 - Certyfikatem provisioning
 - DNS suffixem stacji roboczej
@@ -23,21 +23,21 @@ Obecna niezgodność jest prawdopodobną przyczyną statusu "pending" przy provi
 **Wady:**
 - Wymaga unjoin/rejoin domeny na 20 stacjach
 - Profile użytkowników mogą wymagać migracji
-- Aplikacje powiązane z `absystems.pl` mogą przestać działać
+- Aplikacje powiązane z `domena.pl` mogą przestać działać
 
-### Opcja B: Skonfigurować provisioning pod `absystems.pl`
+### Opcja B: Skonfigurować provisioning pod `domena.pl`
 **Zalety:**
 - Stacje zostają gdzie są
 - Brak ryzyka migracji
 
 **Wady:**
-- Hash w BIOS-ie AMT musi być z CA domeny `absystems.pl` (czy taki CA istnieje?)
-- EMA Server musi obsługiwać suffix `absystems.pl`
+- Hash w BIOS-ie AMT musi być z CA domeny `domena.pl` (czy taki CA istnieje?)
+- EMA Server musi obsługiwać suffix `domena.pl`
 - Wymaga trustu między domenami (jeśli nie istnieje)
 
 ### Opcja C: Ustawić DNS suffix na stacjach ręcznie na `spi.lab`
 **Zalety:**
-- Stacje zostają w `absystems.pl` ale AMT widzi suffix `spi.lab`
+- Stacje zostają w `domena.pl` ale AMT widzi suffix `spi.lab`
 - Minimalny wpływ na istniejące środowisko
 
 **Wady:**
@@ -49,7 +49,7 @@ Obecna niezgodność jest prawdopodobną przyczyną statusu "pending" przy provi
 **Opcja A — przenieść laptopa do domeny `spi.lab`.**
 
 ## Uzasadnienie
-- `absystems.pl` to domena produkcyjna firmy
+- `domena.pl` to domena produkcyjna firmy
 - `spi.lab` to domena labowa, w której testujemy wdrożenie EMA
 - Docelowo u klienta wszystko będzie w jednej domenie od początku — ten problem nie wystąpi na produkcji
-- W labie wystarczy unjoin z `absystems.pl` → join do `spi.lab`
+- W labie wystarczy unjoin z `domena.pl` → join do `spi.lab`

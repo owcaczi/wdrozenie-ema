@@ -9,7 +9,7 @@ To jest najczęstszy przypadek błędu we wdrożeniu AMT i z reguły wynika z "m
 
 ### A) Niezgodność Sufiksu Domeny (DNS Suffix Mismatch)
 
-AMT jest bardzo restrykcyjnie uwrażliwione na Suffix DNS wpisywany podczas generowania pliku Provisioning `setup.bin` oraz Certyfikatu AMT i sufiksu OS serwera. W przypadku naszego wdrożenia mieliśmy domeny testowe `absystems.pl` ze stacją roboczą kontra `spi.lab` dla serwera i wgrany klucz CA dla AD `spi.lab`. 
+AMT jest bardzo restrykcyjnie uwrażliwione na Suffix DNS wpisywany podczas generowania pliku Provisioning `setup.bin` oraz Certyfikatu AMT i sufiksu OS serwera. W przypadku naszego wdrożenia mieliśmy domeny testowe `domena.pl` ze stacją roboczą kontra `spi.lab` dla serwera i wgrany klucz CA dla AD `spi.lab`. 
 
 **Rozwiązanie:** 
 - Zgodnie z wytycznymi projektu, upewnij się, że przeniosłeś fizycznie domenę i sufiks Windowsowy stacji roboczej z powrotem do `spi.lab`. Serwer musi posługiwać się również jednym certyfikatem dla tej samej strefy.
