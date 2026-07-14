@@ -328,4 +328,4 @@ Należy utworzyć dedykowane konta serwisowe w Active Directory:
 
 ---
 
-> **Następny krok:** [02 — Konfiguracja kontrolera domeny](02-kontroler-domeny.md)
+
